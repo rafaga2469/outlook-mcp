@@ -19,10 +19,11 @@ async function handleSendEmail(args) {
     importance = 'normal',
     saveToSentItems = true,
     isHtml,
+    replyToId,
   } = args;
 
   // Validate required parameters
-  if (!to) {
+  if (!replyToId && !to) {
     return {
       content: [
         {
@@ -33,7 +34,7 @@ async function handleSendEmail(args) {
     };
   }
 
-  if (!subject) {
+  if (!replyToId && !subject) {
     return {
       content: [
         {
@@ -59,15 +60,52 @@ async function handleSendEmail(args) {
     // Get access token
     const accessToken = await ensureAuthenticated();
 
-    // Format recipients
-    const toRecipients = to.split(',').map((email) => {
-      email = email.trim();
+    // Determine content type: explicit isHtml param takes precedence, otherwise auto-detect
+    const contentType =
+      isHtml === true
+        ? 'html'
+        : isHtml === false
+          ? 'text'
+          : body.includes('<html') || body.includes('<HTML')
+            ? 'html'
+            : 'text';
+
+    if (replyToId) {
+      await callGraphAPI(
+        accessToken,
+        'POST',
+        `me/messages/${encodeURIComponent(replyToId)}/reply`,
+        {
+          message: {
+            body: {
+              contentType,
+              content: body,
+            },
+          },
+        }
+      );
+
       return {
-        emailAddress: {
-          address: email,
-        },
+        content: [
+          {
+            type: 'text',
+            text: `Reply sent successfully to the original message!\n\nMessage Length: ${body.length} characters`,
+          },
+        ],
       };
-    });
+    }
+
+    // Format recipients
+    const toRecipients = to
+      ? to.split(',').map((email) => {
+          email = email.trim();
+          return {
+            emailAddress: {
+              address: email,
+            },
+          };
+        })
+      : [];
 
     const ccRecipients = cc
       ? cc.split(',').map((email) => {
@@ -90,16 +128,6 @@ async function handleSendEmail(args) {
           };
         })
       : [];
-
-    // Determine content type: explicit isHtml param takes precedence, otherwise auto-detect
-    const contentType =
-      isHtml === true
-        ? 'html'
-        : isHtml === false
-          ? 'text'
-          : body.includes('<html') || body.includes('<HTML')
-            ? 'html'
-            : 'text';
 
     // Prepare email object
     const emailObject = {
