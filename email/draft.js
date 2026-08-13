@@ -12,7 +12,7 @@ const { ensureAuthenticated } = require('../auth');
  * @returns {object} - MCP response
  */
 async function handleDraftEmail(args) {
-  const { to, cc, bcc, subject = '', body = '', importance = 'normal' } = args || {};
+  const { to, cc, bcc, subject = '', body = '', importance = 'normal', isHtml } = args || {};
 
   try {
     // Get access token
@@ -46,12 +46,21 @@ async function handleDraftEmail(args) {
           .filter((r) => r.emailAddress.address)
       : [];
 
+    // Explicit isHtml takes precedence; preserve legacy auto-detection when omitted
+    const contentType =
+      isHtml === true
+        ? 'html'
+        : isHtml === false
+          ? 'text'
+          : typeof body === 'string' && body.toLowerCase().includes('<html')
+            ? 'html'
+            : 'text';
+
     // Create message payload for draft creation
     const messageObject = {
       subject,
       body: {
-        contentType:
-          typeof body === 'string' && body.toLowerCase().includes('<html') ? 'html' : 'text',
+        contentType,
         content: body,
       },
       toRecipients: toRecipients.length > 0 ? toRecipients : undefined,
