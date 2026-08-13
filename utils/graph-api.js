@@ -35,7 +35,14 @@ async function callGraphAPI(accessToken, method, path, data = null, queryParams 
       // Encode path segments properly
       const encodedPath = path
         .split('/')
-        .map((segment) => encodeURIComponent(segment))
+        .map((segment) => {
+          try {
+            // Canonicalize already-encoded dynamic segments without double-encoding them.
+            return encodeURIComponent(decodeURIComponent(segment));
+          } catch {
+            return encodeURIComponent(segment);
+          }
+        })
         .join('/');
 
       // Build query string from parameters with special handling for OData filters

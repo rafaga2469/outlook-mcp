@@ -95,6 +95,19 @@ describe('Graph API helpers', () => {
       expect(query).toEqual(original);
     });
 
+    test('encodes native reply message IDs exactly once in the final URL', async () => {
+      mockRequests(response(202));
+
+      await callGraphAPI('token', 'POST', 'me/messages/original%2Fmessage%20id/reply', {
+        message: { body: { contentType: 'text', content: 'Reply' } },
+      });
+
+      expect(https.request.mock.calls[0][0]).toBe(
+        'https://graph.example/v1.0/me/messages/original%2Fmessage%20id/reply'
+      );
+      expect(https.request.mock.calls[0][0]).not.toContain('%25');
+    });
+
     test('uses a full nextLink unchanged and ignores query parameters', async () => {
       mockRequests(response(200, '{}'));
       const nextLink = 'https://graph.microsoft.com/v1.0/me/messages?$skiptoken=a%2Bb';
