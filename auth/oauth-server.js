@@ -129,11 +129,10 @@ function setupOAuthRoutes(app, tokenStorage, authConfig, envPrefix = 'MS_') {
     // The Gemini review recommended uncommenting the rejection.
     // However, the consuming app (CLI or server) is responsible for session/state storage.
     // This module *cannot* validate state if it wasn't involved in storing it.
-    // The PR author (ranxian) needs to implement state storage & validation in the calling server (sse-server.js or outlook-auth-server.js).
+    // The consuming application needs to implement state storage and validation.
     // For now, enforcing a missing state here would break flows where state *is* passed but not validated by *this specific module*.
     // The best this module can do is check for presence and rely on the consumer to validate the actual value.
     // The original PR #10's outlook-auth-server.js used Date.now() and didn't store/validate it beyond this.
-    // The new sse-server.js also doesn't show session management for state.
     // So, we will make the check for presence mandatory as per Gemini's suggestion.
     if (!state) {
       console.error(
