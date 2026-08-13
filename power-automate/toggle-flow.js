@@ -67,7 +67,7 @@ async function handleToggleFlow(args) {
       };
     }
 
-    if (error.message.includes('403')) {
+    if (error.code === 'FLOW_FORBIDDEN') {
       return {
         content: [
           {
