@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Node.js ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22, 24]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Test
+        run: npm test
+
+  publish-health-badges:
+    name: Publish health badges
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: health-badges
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Collect test and coverage metrics
+        run: >-
+          npm test -- --coverage --coverageReporters=json-summary --json
+          --outputFile=/tmp/jest-results.json
+
+      - name: Generate Shields endpoint data
+        run: |
+          mkdir -p /tmp/health-badges
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          const coverage = JSON.parse(
+            fs.readFileSync('coverage/coverage-summary.json', 'utf8'),
+          );
+          const tests = JSON.parse(
+            fs.readFileSync('/tmp/jest-results.json', 'utf8'),
+          );
+          const coveragePercent = coverage.total.lines.pct;
+          const coverageColor =
+            coveragePercent >= 90
+              ? 'brightgreen'
+              : coveragePercent >= 80
+                ? 'green'
+                : coveragePercent >= 70
+                  ? 'yellowgreen'
+                  : coveragePercent >= 60
+                    ? 'yellow'
+                    : 'red';
+
+          const writeBadge = (name, data) => {
+            fs.writeFileSync(
+              `/tmp/health-badges/${name}.json`,
+              `${JSON.stringify({ schemaVersion: 1, ...data })}\n`,
+            );
+          };
+
+          writeBadge('coverage', {
+            label: 'coverage',
+            message: `${coveragePercent}%`,
+            color: coverageColor,
+          });
+          writeBadge('tests', {
+            label: 'tests',
+            message: `${tests.numPassedTests} passed`,
+            color: tests.numFailedTests === 0 ? 'brightgreen' : 'red',
+          });
+          NODE
+
+      - name: Publish badge data
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+          if git fetch origin badges:refs/remotes/origin/badges; then
+            git switch --detach origin/badges
+          else
+            git switch --orphan badges
+          fi
+
+          git rm -rf --ignore-unmatch .
+          cp /tmp/health-badges/*.json .
+          git add coverage.json tests.json
+
+          if git diff --cached --quiet; then
+            echo 'Badge data is unchanged.'
+            exit 0
+          fi
+
+          git commit -m "ci: update health badges for ${SOURCE_SHA}"
+          git push origin HEAD:badges

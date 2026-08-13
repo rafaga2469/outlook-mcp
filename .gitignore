@@ -40,3 +40,6 @@ logs
 
 # Local skill cache (gentle-ai)
 .atl/
+
+# Local code intelligence index
+.codegraph/

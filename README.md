@@ -1,5 +1,9 @@
 # M365 Assistant MCP Server (maintained fork)
 
+[![CI](https://github.com/rafaga2469/outlook-mcp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rafaga2469/outlook-mcp/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frafaga2469%2Foutlook-mcp%2Fbadges%2Fcoverage.json)](https://github.com/rafaga2469/outlook-mcp/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frafaga2469%2Foutlook-mcp%2Fbadges%2Ftests.json)](https://github.com/rafaga2469/outlook-mcp/actions/workflows/ci.yml)
+
 > Independent fork of [ryaker/outlook-mcp](https://github.com/ryaker/outlook-mcp) with additional fixes and improvements.
 
 A comprehensive MCP (Model Context Protocol) server that connects Claude with Microsoft 365 services through the Microsoft Graph API and Power Automate API. This fork is independently maintained and adds subfolder path resolution, dotenv support in the entrypoint, and a newer MCP Inspector.
@@ -163,7 +167,7 @@ See [Credits](#credits) for the original work this builds on.
 
 ### Prerequisites
 
-- Node.js 14.0.0 or higher
+- Node.js 22.0.0 or higher
 - npm or yarn package manager
 - Azure account for app registration
 
