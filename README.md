@@ -167,7 +167,7 @@ See [Credits](#credits) for the original work this builds on.
 
 ### Prerequisites
 
-- Node.js 22.0.0 or higher
+- Node.js 22.22.1 or higher
 - npm or yarn package manager
 - Azure account for app registration
 

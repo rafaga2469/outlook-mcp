@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [22, 24]
+        node-version: [22.22.1, 24]
 
     steps:
       - name: Checkout repository
@@ -115,6 +115,13 @@ jobs:
         env:
           SOURCE_SHA: ${{ github.sha }}
         run: |
+          git fetch --quiet --force origin main:refs/remotes/origin/main
+          CURRENT_MAIN_SHA="$(git rev-parse refs/remotes/origin/main)"
+          if [ "$SOURCE_SHA" != "$CURRENT_MAIN_SHA" ]; then
+            echo "Skipping stale badge publication for ${SOURCE_SHA}; main is ${CURRENT_MAIN_SHA}."
+            exit 0
+          fi
+
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 
@@ -134,4 +141,12 @@ jobs:
           fi
 
           git commit -m "ci: update health badges for ${SOURCE_SHA}"
+
+          git fetch --quiet --force origin main:refs/remotes/origin/main
+          CURRENT_MAIN_SHA="$(git rev-parse refs/remotes/origin/main)"
+          if [ "$SOURCE_SHA" != "$CURRENT_MAIN_SHA" ]; then
+            echo "Skipping stale badge publication for ${SOURCE_SHA}; main is ${CURRENT_MAIN_SHA}."
+            exit 0
+          fi
+
           git push origin HEAD:badges
