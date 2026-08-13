@@ -131,6 +131,102 @@ describe('handleDraftEmail', () => {
 
     expect(result.content[0].text).toBe('Error creating draft email: Network unavailable');
   });
+
+  test('issue #4: creates a native reply draft, then updates only its HTML body', async () => {
+    callGraphAPI
+      .mockResolvedValueOnce({ id: 'reply draft/id' })
+      .mockResolvedValueOnce({ id: 'reply draft/id', subject: 'RE: Original subject' });
+
+    const result = await handleDraftEmail({
+      replyToId: 'original/message id',
+      body: '<p>Native reply</p>',
+      isHtml: true,
+      to: 'ignored@example.com',
+      cc: 'ignored-cc@example.com',
+      bcc: 'ignored-bcc@example.com',
+      subject: 'Ignored subject',
+      importance: 'high',
+    });
+
+    expect(callGraphAPI.mock.calls).toEqual([
+      [accessToken, 'POST', 'me/messages/original%2Fmessage%20id/createReply'],
+      [
+        accessToken,
+        'PATCH',
+        'me/messages/reply%20draft%2Fid',
+        {
+          body: { contentType: 'html', content: '<p>Native reply</p>' },
+        },
+      ],
+    ]);
+    expect(result.content[0].text).toContain('Reply draft created successfully!');
+    expect(result.content[0].text).toContain('Draft ID: reply draft/id');
+    expect(result.content[0].text).toContain('Subject: RE: Original subject');
+    expect(result.content[0].text).toContain('Recipients: inherited from original message');
+  });
+
+  test('issue #4: creates a plain-text reply draft without comment or message payloads', async () => {
+    callGraphAPI
+      .mockResolvedValueOnce({ id: 'reply-id' })
+      .mockResolvedValueOnce({ id: 'reply-id' });
+
+    await handleDraftEmail({
+      replyToId: 'original-id',
+      body: '<html>literal text</html>',
+      isHtml: false,
+    });
+
+    expect(callGraphAPI).toHaveBeenNthCalledWith(
+      1,
+      accessToken,
+      'POST',
+      'me/messages/original-id/createReply'
+    );
+    expect(callGraphAPI).toHaveBeenNthCalledWith(2, accessToken, 'PATCH', 'me/messages/reply-id', {
+      body: { contentType: 'text', content: '<html>literal text</html>' },
+    });
+    expect(callGraphAPI.mock.calls[0]).toHaveLength(3);
+  });
+
+  test('issue #4: rejects a createReply response without a draft ID before PATCH', async () => {
+    callGraphAPI.mockResolvedValueOnce({ subject: 'RE: Original subject' });
+
+    const result = await handleDraftEmail({ replyToId: 'original-id', body: 'Reply' });
+
+    expect(callGraphAPI).toHaveBeenCalledTimes(1);
+    expect(result.content[0].text).toContain('Error creating draft email:');
+    expect(result.content[0].text).toContain('did not return a draft ID');
+  });
+
+  test('issue #4: falls back to the createReply details when PATCH omits them', async () => {
+    callGraphAPI
+      .mockResolvedValueOnce({ id: 'reply-id', subject: 'RE: Original subject' })
+      .mockResolvedValueOnce({});
+
+    const result = await handleDraftEmail({ replyToId: 'original-id', body: 'Reply' });
+
+    expect(result.content[0].text).toContain('Draft ID: reply-id');
+    expect(result.content[0].text).toContain('Subject: RE: Original subject');
+  });
+
+  test('issue #4: reports authentication failure before creating a reply draft', async () => {
+    ensureAuthenticated.mockRejectedValue(new Error('Authentication required'));
+
+    const result = await handleDraftEmail({ replyToId: 'original-id', body: 'Reply' });
+
+    expect(result.content[0].text).toBe(
+      "Authentication required. Please use the 'authenticate' tool first."
+    );
+    expect(callGraphAPI).not.toHaveBeenCalled();
+  });
+
+  test('issue #4: reports Graph failures while creating a reply draft', async () => {
+    callGraphAPI.mockRejectedValue(new Error('Network unavailable'));
+
+    const result = await handleDraftEmail({ replyToId: 'original-id', body: 'Reply' });
+
+    expect(result.content[0].text).toBe('Error creating draft email: Network unavailable');
+  });
 });
 
 describe('draft-email tool schema', () => {
@@ -142,6 +238,17 @@ describe('draft-email tool schema', () => {
       type: 'boolean',
       description:
         'Set to true to create as HTML, false for plain text. If not specified, auto-detects based on <html> tag presence.',
+    });
+  });
+
+  test('issue #4: exposes replyToId without requiring new-message fields', () => {
+    const draftTool = emailTools.find(({ name }) => name === 'draft-email');
+
+    expect(draftTool.inputSchema.required).toEqual([]);
+    expect(draftTool.inputSchema.properties.replyToId).toEqual({
+      type: 'string',
+      description:
+        'ID of the existing message to reply to. When provided, recipients and subject are inherited from the original message.',
     });
   });
 });
