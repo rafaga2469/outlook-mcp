@@ -42,14 +42,11 @@ async function callGraphAPI(accessToken, method, path, data = null, queryParams 
       let queryString = '';
       if (Object.keys(queryParams).length > 0) {
         // Handle $filter parameter specially to ensure proper URI encoding
-        const filter = queryParams.$filter;
-        if (filter) {
-          delete queryParams.$filter; // Remove from regular params
-        }
+        const { $filter: filter, ...regularParams } = queryParams;
 
         // Build query string with proper encoding for regular params
         const params = new URLSearchParams();
-        for (const [key, value] of Object.entries(queryParams)) {
+        for (const [key, value] of Object.entries(regularParams)) {
           params.append(key, value);
         }
 
