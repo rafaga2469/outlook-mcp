@@ -5,44 +5,44 @@
 
 ## Verdict
 
-| Check | Result |
-|-------|--------|
-| Verify phase | PASS ✅ |
-| Requirements | 8/8 compliant |
-| Scenarios | 16/16 covered |
-| Tests passing | 166 (148 existing + 18 new) |
-| ESLint errors | 0 (1 fixed during apply: unused `path` in token-manager.js) |
-| Stale imports | 0 |
-| Task completion | 16/16 tasks complete |
-| Review gate | N/A — orchestrator-launched archive after verify pass |
+| Check           | Result                                                      |
+| --------------- | ----------------------------------------------------------- |
+| Verify phase    | PASS ✅                                                     |
+| Requirements    | 8/8 compliant                                               |
+| Scenarios       | 16/16 covered                                               |
+| Tests passing   | 166 (148 existing + 18 new)                                 |
+| ESLint errors   | 0 (1 fixed during apply: unused `path` in token-manager.js) |
+| Stale imports   | 0                                                           |
+| Task completion | 16/16 tasks complete                                        |
+| Review gate     | N/A — orchestrator-launched archive after verify pass       |
 
 ## Specs Synced
 
-| Domain | Action | Details |
-|--------|--------|---------|
-| `power-automate` | Created | New main spec at `openspec/specs/power-automate/spec.md` — 5 requirements, 9 scenarios (Flow Token Storage, Retrieval, Expiry, No Auto-Refresh, Backwards Compatibility) |
-| `auth` | Updated | Merged 3 new requirements (Flow Token Methods in TokenStorage, Five Handler Import Migration, token-manager.js Retention) with 7 scenarios into existing `openspec/specs/auth/spec.md` |
+| Domain           | Action  | Details                                                                                                                                                                                |
+| ---------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `power-automate` | Created | New main spec at `openspec/specs/power-automate/spec.md` — 5 requirements, 9 scenarios (Flow Token Storage, Retrieval, Expiry, No Auto-Refresh, Backwards Compatibility)               |
+| `auth`           | Updated | Merged 3 new requirements (Flow Token Methods in TokenStorage, Five Handler Import Migration, token-manager.js Retention) with 7 scenarios into existing `openspec/specs/auth/spec.md` |
 
 ## Archive Contents
 
-| Artifact | Status |
-|----------|--------|
-| `exploration.md` | ✅ |
-| `proposal.md` | ✅ |
-| `specs/flow-token-management/spec.md` | ✅ |
-| `specs/auth/spec.md` | ✅ |
-| `design.md` | ✅ |
-| `tasks.md` | ✅ (16/16 tasks complete) |
-| `verify-report.md` | ✅ (PASS) |
-| `archive-report.md` | ✅ (this file) |
+| Artifact                              | Status                    |
+| ------------------------------------- | ------------------------- |
+| `exploration.md`                      | ✅                        |
+| `proposal.md`                         | ✅                        |
+| `specs/flow-token-management/spec.md` | ✅                        |
+| `specs/auth/spec.md`                  | ✅                        |
+| `design.md`                           | ✅                        |
+| `tasks.md`                            | ✅ (16/16 tasks complete) |
+| `verify-report.md`                    | ✅ (PASS)                 |
+| `archive-report.md`                   | ✅ (this file)            |
 
 ## Engram Observation IDs (Traceability)
 
-| Artifact | Observation ID |
-|----------|---------------|
-| `sdd/migrate-power-automate-token-storage/apply-progress` | #1911 |
-| `sdd/migrate-power-automate-token-storage/verify-report` | #1913 |
-| `sdd/migrate-power-automate-token-storage/archive-report` | (this save) |
+| Artifact                                                  | Observation ID |
+| --------------------------------------------------------- | -------------- |
+| `sdd/migrate-power-automate-token-storage/apply-progress` | #1911          |
+| `sdd/migrate-power-automate-token-storage/verify-report`  | #1913          |
+| `sdd/migrate-power-automate-token-storage/archive-report` | (this save)    |
 
 ## Implementation Summary
 
@@ -55,6 +55,7 @@
 ## Source of Truth Updated
 
 The following main specs now reflect the new behavior:
+
 - `openspec/specs/power-automate/spec.md` — new spec for Flow token management
 - `openspec/specs/auth/spec.md` — updated with Flow token methods, handler migration, and token-manager retention requirements
 

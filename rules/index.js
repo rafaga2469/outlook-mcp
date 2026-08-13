@@ -60,14 +60,9 @@ async function handleEditRuleSequence(args) {
     }
 
     // Update the rule sequence
-    await callGraphAPI(
-      accessToken,
-      'PATCH',
-      `me/mailFolders/inbox/messageRules/${rule.id}`,
-      {
-        sequence: sequence,
-      }
-    );
+    await callGraphAPI(accessToken, 'PATCH', `me/mailFolders/inbox/messageRules/${rule.id}`, {
+      sequence: sequence,
+    });
 
     return {
       content: [

@@ -7,6 +7,7 @@ Five power-automate handlers still import `getFlowAccessToken` from the deprecat
 ## Scope
 
 ### In Scope
+
 - Add `getFlowAccessToken()`, `saveFlowTokens()`, `isFlowTokenExpired()`, `getValidFlowAccessToken()` to TokenStorage
 - Update imports in 5 power-automate handlers to use TokenStorage
 - Keep `token-manager.js` alive only for `createTestTokens()` (test mode)
@@ -14,6 +15,7 @@ Five power-automate handlers still import `getFlowAccessToken` from the deprecat
 - Backwards compatible: existing token files with `flow_` keys continue to work
 
 ### Out of Scope
+
 - Flow token auto-refresh (follow-up — requires separate OAuth endpoint call)
 - Migrating `createTestTokens()` out of token-manager.js
 - Changes to the auth server or OAuth flow for Flow tokens
@@ -22,9 +24,11 @@ Five power-automate handlers still import `getFlowAccessToken` from the deprecat
 ## Capabilities
 
 ### New Capabilities
+
 - `flow-token-management`: Flow token storage, retrieval, expiry checking, and TokenStorage integration
 
 ### Modified Capabilities
+
 - `auth`: TokenStorage class gains Flow token methods (`getFlowAccessToken`, `saveFlowTokens`, `isFlowTokenExpired`, `getValidFlowAccessToken`)
 
 ## Approach
@@ -33,26 +37,26 @@ Add Flow token methods to `auth/token-storage.js` — thin wrappers around the e
 
 ## Affected Areas
 
-| Area | Impact | Description |
-|------|--------|-------------|
-| `auth/token-storage.js` | Modified | Add 4 Flow token methods |
+| Area                                  | Impact   | Description                                        |
+| ------------------------------------- | -------- | -------------------------------------------------- |
+| `auth/token-storage.js`               | Modified | Add 4 Flow token methods                           |
 | `power-automate/list-environments.js` | Modified | Import from token-storage instead of token-manager |
-| `power-automate/list-flows.js` | Modified | Same import swap |
-| `power-automate/list-runs.js` | Modified | Same import swap |
-| `power-automate/run-flow.js` | Modified | Same import swap |
-| `power-automate/toggle-flow.js` | Modified | Same import swap |
-| `auth/token-manager.js` | Modified | Remove Flow methods, keep createTestTokens |
-| `auth/index.js` | Modified | Update exports if needed |
-| `test/auth/token-storage.test.js` | Modified | Add Flow token tests |
+| `power-automate/list-flows.js`        | Modified | Same import swap                                   |
+| `power-automate/list-runs.js`         | Modified | Same import swap                                   |
+| `power-automate/run-flow.js`          | Modified | Same import swap                                   |
+| `power-automate/toggle-flow.js`       | Modified | Same import swap                                   |
+| `auth/token-manager.js`               | Modified | Remove Flow methods, keep createTestTokens         |
+| `auth/index.js`                       | Modified | Update exports if needed                           |
+| `test/auth/token-storage.test.js`     | Modified | Add Flow token tests                               |
 
 ## Risks
 
-| Risk | Likelihood | Mitigation |
-|------|------------|------------|
-| Token file race: TokenStorage writes full file while old path writes Flow tokens | Low | Migrate all writers atomically in one change |
-| No Flow auto-refresh: expired tokens return null (same as today) | Medium | Documented as follow-up; behavior unchanged from current state |
-| Test mode breakage: auth/tools.js uses tokenManager.createTestTokens | Low | Keep createTestTokens in token-manager.js |
-| Backwards compatibility: existing flow_ keys must be read correctly | Low | TokenStorage already reads/writes full JSON — just add key accessors |
+| Risk                                                                             | Likelihood | Mitigation                                                           |
+| -------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------- |
+| Token file race: TokenStorage writes full file while old path writes Flow tokens | Low        | Migrate all writers atomically in one change                         |
+| No Flow auto-refresh: expired tokens return null (same as today)                 | Medium     | Documented as follow-up; behavior unchanged from current state       |
+| Test mode breakage: auth/tools.js uses tokenManager.createTestTokens             | Low        | Keep createTestTokens in token-manager.js                            |
+| Backwards compatibility: existing flow_ keys must be read correctly              | Low        | TokenStorage already reads/writes full JSON — just add key accessors |
 
 ## Rollback Plan
 

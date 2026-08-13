@@ -42,17 +42,17 @@ Add four Flow token methods to `auth/token-storage.js` (TokenStorage) as thin wr
 
 ## File Changes
 
-| File | Action | Description |
-|------|--------|-------------|
-| `auth/token-storage.js` | Modify | Add 4 Flow token methods (getFlowAccessToken, saveFlowTokens, isFlowTokenExpired, getValidFlowAccessToken) |
-| `auth/index.js` | Modify | Export `tokenStorage` singleton (already exists; ensure it's exported for handler import) |
-| `power-automate/list-environments.js` | Modify | Swap import to `tokenStorage` from `auth/index.js`; `await getValidFlowAccessToken()` |
-| `power-automate/list-flows.js` | Modify | Same swap |
-| `power-automate/list-runs.js` | Modify | Same swap |
-| `power-automate/run-flow.js` | Modify | Same swap |
-| `power-automate/toggle-flow.js` | Modify | Same swap |
-| `auth/token-manager.js` | Modify | Remove `getFlowAccessToken`, `saveFlowTokens` and their exports; keep `createTestTokens` |
-| `test/auth/token-storage.test.js` | Modify | Add Flow token unit tests |
+| File                                  | Action | Description                                                                                                |
+| ------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
+| `auth/token-storage.js`               | Modify | Add 4 Flow token methods (getFlowAccessToken, saveFlowTokens, isFlowTokenExpired, getValidFlowAccessToken) |
+| `auth/index.js`                       | Modify | Export `tokenStorage` singleton (already exists; ensure it's exported for handler import)                  |
+| `power-automate/list-environments.js` | Modify | Swap import to `tokenStorage` from `auth/index.js`; `await getValidFlowAccessToken()`                      |
+| `power-automate/list-flows.js`        | Modify | Same swap                                                                                                  |
+| `power-automate/list-runs.js`         | Modify | Same swap                                                                                                  |
+| `power-automate/run-flow.js`          | Modify | Same swap                                                                                                  |
+| `power-automate/toggle-flow.js`       | Modify | Same swap                                                                                                  |
+| `auth/token-manager.js`               | Modify | Remove `getFlowAccessToken`, `saveFlowTokens` and their exports; keep `createTestTokens`                   |
+| `test/auth/token-storage.test.js`     | Modify | Add Flow token unit tests                                                                                  |
 
 ## Interfaces / Contracts
 
@@ -75,13 +75,13 @@ async getValidFlowAccessToken() -> string | null
 
 ## Testing Strategy
 
-| Layer | What to Test | Approach |
-|-------|-------------|----------|
-| Unit | `isFlowTokenExpired` true/false/missing | Set `this.tokens` with flow keys, assert (mirrors existing `isTokenExpired` tests) |
-| Unit | `getFlowAccessToken` reads flow key, returns null if expired/missing | Mock `getTokens` returning tokens with flow_* keys |
-| Unit | `saveFlowTokens` merges flow_* and preserves Graph keys | Set `this.tokens` with Graph keys, call saveFlowTokens, assert `fs.writeFile` payload has both |
-| Unit | `getValidFlowAccessToken` returns token if valid, null if expired | Combination of above mocks |
-| Integration | 5 handlers return "auth required" when no Flow token | Existing behavior; mock tokenStorage.getValidFlowAccessToken → null |
+| Layer       | What to Test                                                         | Approach                                                                                       |
+| ----------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Unit        | `isFlowTokenExpired` true/false/missing                              | Set `this.tokens` with flow keys, assert (mirrors existing `isTokenExpired` tests)             |
+| Unit        | `getFlowAccessToken` reads flow key, returns null if expired/missing | Mock `getTokens` returning tokens with flow_* keys                                             |
+| Unit        | `saveFlowTokens` merges flow_* and preserves Graph keys              | Set `this.tokens` with Graph keys, call saveFlowTokens, assert `fs.writeFile` payload has both |
+| Unit        | `getValidFlowAccessToken` returns token if valid, null if expired    | Combination of above mocks                                                                     |
+| Integration | 5 handlers return "auth required" when no Flow token                 | Existing behavior; mock tokenStorage.getValidFlowAccessToken → null                            |
 
 ## Threat Matrix
 

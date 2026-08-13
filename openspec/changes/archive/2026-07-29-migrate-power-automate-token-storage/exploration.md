@@ -57,6 +57,7 @@ Flow tokens are stored in the **same file** as Graph tokens (`~/.outlook-mcp-tok
 ### Ready for Proposal
 
 Yes — the scope is well understood, the approach is clear, and the changes are mechanical. The proposal should cover:
+
 1. New methods on TokenStorage for Flow tokens
 2. Updated imports in the 5 power-automate handlers
 3. Keeping token-manager.js for createTestTokens() (or migrating that too)
