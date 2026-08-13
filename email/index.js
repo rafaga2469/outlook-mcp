@@ -98,13 +98,15 @@ const emailTools = [
   },
   {
     name: 'send-email',
-    description: 'Composes and sends a new email. Supports both plain text and HTML content.',
+    description:
+      'Composes and sends a new email, or replies to an existing message when replyToId is provided. Supports both plain text and HTML content.',
     inputSchema: {
       type: 'object',
       properties: {
         to: {
           type: 'string',
-          description: 'Comma-separated list of recipient email addresses',
+          description:
+            'Comma-separated list of recipient email addresses. Required when creating a new email; inherited from the original message when replying.',
         },
         cc: {
           type: 'string',
@@ -116,7 +118,8 @@ const emailTools = [
         },
         subject: {
           type: 'string',
-          description: 'Email subject',
+          description:
+            'Email subject. Required when creating a new email; inherited from the original message when replying.',
         },
         body: {
           type: 'string',
@@ -126,6 +129,11 @@ const emailTools = [
           type: 'boolean',
           description:
             'Set to true to send as HTML, false for plain text. If not specified, auto-detects based on <html> tag presence.',
+        },
+        replyToId: {
+          type: 'string',
+          description:
+            'ID of the existing message to reply to. When provided, recipients and subject are inherited from the original message.',
         },
         importance: {
           type: 'string',
@@ -137,7 +145,7 @@ const emailTools = [
           description: 'Whether to save the email to sent items',
         },
       },
-      required: ['to', 'subject', 'body'],
+      required: ['body'],
     },
     handler: handleSendEmail,
   },
