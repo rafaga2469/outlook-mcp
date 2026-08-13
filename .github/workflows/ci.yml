@@ -125,6 +125,11 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 
+          # npm may update tracked metadata during metric collection. The badge
+          # payloads already live in /tmp, so restore the ephemeral checkout
+          # before switching to the publication branch.
+          git reset --hard HEAD
+
           if git fetch origin badges:refs/remotes/origin/badges; then
             git switch --detach origin/badges
           else
