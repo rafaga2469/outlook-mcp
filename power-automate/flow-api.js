@@ -54,11 +54,11 @@ async function callFlowAPI(accessToken, method, path, data = null) {
         } else if (res.statusCode === 401) {
           reject(new Error('FLOW_UNAUTHORIZED'));
         } else if (res.statusCode === 403) {
-          reject(
-            new Error(
-              'Access denied. Ensure your account has Power Automate access and the flow is solution-aware.'
-            )
+          const error = new Error(
+            'Access denied. Ensure your account has Power Automate access and the flow is solution-aware.'
           );
+          error.code = 'FLOW_FORBIDDEN';
+          reject(error);
         } else {
           reject(new Error(`Flow API call failed with status ${res.statusCode}: ${responseData}`));
         }
@@ -81,21 +81,21 @@ async function callFlowAPI(accessToken, method, path, data = null) {
  * Simulate Flow API response for test mode
  */
 function simulateFlowResponse(method, path) {
-  if (path.includes('/environments')) {
+  if (path.includes('/runs')) {
     return {
       value: [
         {
-          name: 'Default-12345',
+          name: 'run-123',
           properties: {
-            displayName: 'Default Environment',
-            isDefault: true,
+            status: 'Succeeded',
+            startTime: new Date().toISOString(),
           },
         },
       ],
     };
   }
 
-  if (path.includes('/flows') && !path.includes('/runs')) {
+  if (path.includes('/flows')) {
     return {
       value: [
         {
@@ -110,14 +110,14 @@ function simulateFlowResponse(method, path) {
     };
   }
 
-  if (path.includes('/runs')) {
+  if (path.includes('/environments')) {
     return {
       value: [
         {
-          name: 'run-123',
+          name: 'Default-12345',
           properties: {
-            status: 'Succeeded',
-            startTime: new Date().toISOString(),
+            displayName: 'Default Environment',
+            isDefault: true,
           },
         },
       ],
