@@ -12,7 +12,16 @@ const { ensureAuthenticated } = require('../auth');
  * @returns {object} - MCP response
  */
 async function handleDraftEmail(args) {
-  const { to, cc, bcc, subject = '', body = '', importance = 'normal', isHtml } = args || {};
+  const {
+    to,
+    cc,
+    bcc,
+    subject = '',
+    body = '',
+    importance = 'normal',
+    isHtml,
+    replyToId,
+  } = args || {};
 
   try {
     // Get access token
@@ -55,6 +64,37 @@ async function handleDraftEmail(args) {
           : typeof body === 'string' && body.toLowerCase().includes('<html')
             ? 'html'
             : 'text';
+
+    if (replyToId) {
+      const replyDraft = await callGraphAPI(
+        accessToken,
+        'POST',
+        `me/messages/${encodeURIComponent(replyToId)}/createReply`
+      );
+      if (!replyDraft || !replyDraft.id) {
+        throw new Error('Microsoft Graph createReply did not return a draft ID');
+      }
+      const updatedDraft = await callGraphAPI(
+        accessToken,
+        'PATCH',
+        `me/messages/${encodeURIComponent(replyDraft.id)}`,
+        {
+          body: {
+            contentType,
+            content: body,
+          },
+        }
+      );
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Reply draft created successfully!\n\nDraft ID: ${updatedDraft.id || replyDraft.id}\nSubject: ${updatedDraft.subject || replyDraft.subject || '(no subject)'}\nRecipients: inherited from original message`,
+          },
+        ],
+      };
+    }
 
     // Create message payload for draft creation
     const messageObject = {
