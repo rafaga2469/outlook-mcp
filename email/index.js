@@ -167,6 +167,11 @@ const emailTools = [
           type: 'string',
           description: 'Draft email body content (can be plain text or HTML)',
         },
+        isHtml: {
+          type: 'boolean',
+          description:
+            'Set to true to create as HTML, false for plain text. If not specified, auto-detects based on <html> tag presence.',
+        },
         importance: {
           type: 'string',
           description: 'Email importance (normal, high, low)',
