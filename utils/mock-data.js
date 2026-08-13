@@ -10,7 +10,7 @@
  * @param {object} queryParams - Query parameters
  * @returns {object} - Simulated API response
  */
-function simulateGraphAPIResponse(method, path, _data, _queryParams) {
+function simulateGraphAPIResponse(method, path, data, _queryParams) {
   console.error(`Simulating response for: ${method} ${path}`);
 
   if (method === 'GET') {
@@ -192,9 +192,24 @@ function simulateGraphAPIResponse(method, path, _data, _queryParams) {
         ],
       };
     }
-  } else if (method === 'POST' && path.includes('sendMail')) {
-    // Simulate a successful email send
-    return {};
+  } else if (method === 'POST') {
+    if (path.endsWith('/createReply')) {
+      return {
+        id: 'simulated-reply-draft-id',
+        subject: 'RE: Simulated Email Subject',
+      };
+    }
+
+    if (path.endsWith('/reply') || path.includes('sendMail')) {
+      // Simulate a successful email send or native reply
+      return {};
+    }
+  } else if (method === 'PATCH' && path.includes('/messages/')) {
+    return {
+      id: path.split('/').at(-1),
+      subject: 'RE: Simulated Email Subject',
+      body: data && data.body,
+    };
   }
 
   // If we get here, we don't have a simulation for this endpoint

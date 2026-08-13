@@ -143,7 +143,8 @@ const emailTools = [
   },
   {
     name: 'draft-email',
-    description: 'Creates and saves an email draft in Outlook',
+    description:
+      'Creates and saves a new email draft, or a reply draft when replyToId is provided.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -171,6 +172,11 @@ const emailTools = [
           type: 'boolean',
           description:
             'Set to true to create as HTML, false for plain text. If not specified, auto-detects based on <html> tag presence.',
+        },
+        replyToId: {
+          type: 'string',
+          description:
+            'ID of the existing message to reply to. When provided, recipients and subject are inherited from the original message.',
         },
         importance: {
           type: 'string',
